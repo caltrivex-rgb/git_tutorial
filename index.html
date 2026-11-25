@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171412">
+  <title>咖啡店销售数据看板</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#171412;--panel:#211c19;--panel2:#28211d;--line:#3a302a;--text:#f4eee8;--muted:#a89b91;--caramel:#C68B59;--cream:#E8D5B7;--brown:#4A342E;--green:#9ebd9b;--red:#e18b76}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -10%,#493328 0,transparent 37%),var(--bg);color:var(--text);font:14px/1.5 Inter,"PingFang SC","Microsoft YaHei",sans-serif;min-height:100vh}
+    .shell{max-width:1500px;margin:auto;padding:28px 32px 48px}.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:24px}.eyebrow{color:var(--caramel);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}.title{font-size:27px;line-height:1.2;margin:7px 0 6px;letter-spacing:.02em}.subtitle{color:var(--muted);font-size:12px}.controls{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:9px}.control,select,.date-input,button{font:inherit;color:var(--text);background:#29221e;border:1px solid var(--line);border-radius:8px;padding:9px 12px}.control{display:flex;align-items:center;gap:7px}.control label{font-size:11px;color:var(--muted)}select,.date-input{padding:7px 9px;outline:none}button{cursor:pointer;transition:.18s}button:hover{border-color:var(--caramel);color:var(--cream)}button.active,.primary{background:var(--caramel);border-color:var(--caramel);color:#211711}.date-input{width:128px;font-size:11px}.range-control{display:flex;gap:5px;align-items:center}.range-control span{color:var(--muted);font-size:11px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0 18px}.pills{display:flex;gap:6px;flex-wrap:wrap}.pills button{padding:7px 11px;font-size:12px;color:var(--muted)}.pills button.active{color:#211711}.export{font-size:12px}
+    .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:16px}.card,.panel{background:linear-gradient(145deg,rgba(42,34,29,.97),rgba(31,26,23,.98));border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 28px #00000014}.kpi{padding:16px 17px;min-height:118px;position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;right:-20px;top:-35px;width:90px;height:90px;border:1px solid #c68b5927;border-radius:50%}.kpi-label{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:7px}.kpi-value{font-size:23px;font-weight:700;margin:13px 0 5px;letter-spacing:-.03em}.kpi-foot{font-size:10px;color:var(--muted)}.positive{color:var(--green)}.accent{color:var(--caramel)}
+    .dashboard{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:14px;align-items:stretch}.column{display:flex;flex-direction:column;gap:14px;min-width:0}.panel{padding:16px;min-width:0}.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px}.panel-title{font-size:13px;font-weight:700;margin:0}.panel-sub{font-size:10px;color:var(--muted);margin-top:3px}.chart-box{height:220px;position:relative}.chart-box.small{height:190px}.chart-box.tall{height:260px}.legend-note{color:var(--muted);font-size:10px}.forecast-tag{font-size:10px;color:var(--caramel);border:1px solid #c68b5940;border-radius:99px;padding:4px 8px;white-space:nowrap}.heatmap-wrap{overflow:auto}.heatmap{display:grid;grid-template-columns:42px repeat(15,minmax(15px,1fr));gap:4px;min-width:370px;align-items:center}.heat-label{font-size:9px;color:var(--muted);text-align:right;padding-right:3px}.heat-hour{font-size:8px;color:var(--muted);text-align:center}.heat-cell{height:18px;border-radius:4px;background:#4a342e;cursor:default;transition:transform .12s}.heat-cell:hover{outline:1px solid var(--cream);transform:scale(1.12)}.heat-legend{display:flex;align-items:center;justify-content:flex-end;gap:5px;color:var(--muted);font-size:9px;margin-top:8px}.heat-legend i{width:13px;height:9px;border-radius:2px;display:inline-block}
+    .week-table{width:100%;border-collapse:collapse;font-size:11px}.week-table th,.week-table td{text-align:left;padding:9px 7px;border-bottom:1px solid #ffffff0c}.week-table th{color:var(--muted);font-weight:500}.week-table td:last-child,.week-table th:last-child{text-align:right}.week-table tr:last-child td{border-bottom:0}.table-note{font-size:10px;color:var(--muted);padding-top:7px}.alert{font-size:10px;color:var(--cream);background:#c68b5917;border:1px solid #c68b5930;padding:8px 10px;border-radius:7px;margin-top:10px}.empty{height:100%;display:grid;place-items:center;color:var(--muted);font-size:12px}.footer{color:#83766d;text-align:center;font-size:10px;margin-top:20px}
+    @media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.dashboard{grid-template-columns:1fr 1fr}.column:first-child{grid-column:span 2}.topbar{flex-direction:column}.controls{justify-content:flex-start}}
+    @media(max-width:700px){.shell{padding:20px 14px 32px}.title{font-size:23px}.controls{justify-content:flex-start}.control{flex-wrap:wrap}.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kpi{padding:13px;min-height:104px}.kpi-value{font-size:19px}.dashboard{grid-template-columns:1fr}.column:first-child{grid-column:auto}.toolbar{align-items:flex-start;flex-direction:column}.chart-box{height:205px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div><div class="eyebrow">Brew &amp; Bloom · SAMPLE ANALYTICS</div><h1 class="title">咖啡店销售数据看板</h1><div class="subtitle">虚构演示数据 · 2025.01.01 — 2025.01.30 · 金额单位：¥</div></div>
+      <div class="controls">
+        <div class="control"><label for="storeFilter">门店</label><select id="storeFilter"><option value="all">全部门店</option></select></div>
+        <div class="control"><label for="channelFilter">渠道</label><select id="channelFilter"><option value="all">全部渠道</option><option>堂食</option><option>外卖</option><option>自提</option></select></div>
+        <div class="control"><label>日期</label><select id="datePreset"><option value="all">本月（30天）</option><option value="today">今日</option><option value="week">本周</option><option value="quarter">本季度</option><option value="custom">自定义</option></select></div>
+      </div>
+    </header>
+    <div class="toolbar"><div class="pills" id="trendPills" aria-label="趋势粒度"><button class="active" data-grain="day">按日</button><button data-grain="week">按周</button><button data-grain="month">按月</button></div><div class="range-control" id="customRange" hidden><input class="date-input" type="date" id="fromDate" min="2025-01-01" max="2025-01-30"><span>至</span><input class="date-input" type="date" id="toDate" min="2025-01-01" max="2025-01-30"></div><button class="export" id="exportCsv">导出筛选数据 ↓</button></div>
+    <section class="kpis" aria-label="关键指标">
+      <article class="card kpi"><div class="kpi-label">销售额 <span class="accent">▰</span></div><div class="kpi-value" id="salesKpi">—</div><div class="kpi-foot" id="salesFoot">当前筛选周期</div></article>
+      <article class="card kpi"><div class="kpi-label">订单估算 <span class="accent">◷</span></div><div class="kpi-value" id="ordersKpi">—</div><div class="kpi-foot">依据虚构销量估算</div></article>
+      <article class="card kpi"><div class="kpi-label">平均客单价 <span class="accent">⌁</span></div><div class="kpi-value" id="avgKpi">—</div><div class="kpi-foot">销售额 ÷ 订单估算</div></article>
+      <article class="card kpi"><div class="kpi-label">对比增长 <span class="accent">↗</span></div><div class="kpi-value" id="growthKpi">—</div><div class="kpi-foot">前后半周期对比</div></article>
+      <article class="card kpi"><div class="kpi-label">会员销量占比 <span class="accent">✦</span></div><div class="kpi-value" id="memberKpi">—</div><div class="kpi-foot">按会员销量估算</div></article>
+      <article class="card kpi"><div class="kpi-label">最畅销商品 <span class="accent">★</span></div><div class="kpi-value" id="bestKpi">—</div><div class="kpi-foot" id="bestFoot">按销量统计</div></article>
+    </section>
+    <section class="dashboard">
+      <div class="column">
+        <article class="panel"><div class="panel-head"><div><h2 class="panel-title">销售额趋势</h2><div class="panel-sub">实线为历史销售额，虚线为未来 7 天趋势估算</div></div><span class="forecast-tag">+7 天预测</span></div><div class="chart-box"><canvas id="trendChart" aria-label="销售额趋势折线图"></canvas></div><div id="anomalyNote" class="alert" hidden></div></article>
+        <article class="panel"><div class="panel-head"><div><h2 class="panel-title">时段销售热力图</h2><div class="panel-sub">星期 × 08:00–22:00 · 单元格越亮表示销量越高</div></div></div><div id="heatmap" class="heatmap-wrap"></div><div class="heat-legend">低 <i style="background:#4a342e"></i><i style="background:#825a3d"></i><i style="background:#C68B59"></i><i style="background:#E8D5B7"></i> 高</div></article>
+        <article class="panel"><div class="panel-head"><div><h2 class="panel-title">星期平均销售额</h2><div class="panel-sub">根据当前筛选结果计算</div></div></div><table class="week-table"><thead><tr><th>星期</th><th>平均销售额</th><th>样本天数</th></tr></thead><tbody id="weekdayTable"></tbody></table><div class="table-note">无数据的星期将显示为 —</div></article>
+      </div>
+      <div class="column">
+        <article class="panel"><div class="panel-head"><div><h2 class="panel-title">商品品类销售占比</h2><div class="panel-sub">点击品类可联动筛选其他图表</div></div><button id="clearCategory" class="export">清除筛选</button></div><div class="chart-box small"><canvas id="categoryChart"></canvas></div></article>
+        <article class="panel"><div class="panel-head"><div><h2 class="panel-title">热销商品 Top 10</h2><div class="panel-sub">按销量排序 · 当前品类联动</div></div></div><div class="chart-box tall"><canvas id="topChart"></canvas></div></article>
+        <article class="panel"><div class="panel-head"><div><h2 class="panel-title">支付方式</h2><div class="panel-sub">按销售额占比</div></div></div><div class="chart-box small"><canvas id="paymentChart"></canvas></div></article>
+      </div>
+      <div class="column">
+        <article class="panel"><div class="panel-head"><div><h2 class="panel-title">门店 / 渠道对比</h2><div class="panel-sub">各门店按渠道拆分销售额</div></div></div><div class="chart-box"><canvas id="storeChart"></canvas></div></article>
+        <article class="panel"><div class="panel-head"><div><h2 class="panel-title">会员 vs 非会员趋势</h2><div class="panel-sub">按会员销量占比分拆估算销售额</div></div></div><div class="chart-box"><canvas id="memberChart"></canvas></div></article>
+        <article class="panel"><div class="panel-head"><div><h2 class="panel-title">数据说明</h2></div></div><div class="panel-sub" style="font-size:11px;line-height:1.8">本页面仅使用本地 JavaScript 变量生成的虚构示例数据；无真实门店、客户或交易记录。图表需联网加载 Chart.js CDN；数据与页面可离线保存，但图表库离线不可用。<br>趋势预测为近 7 天均值的演示性估算，不构成真实业务预测。</div></article>
+      </div>
+    </section>
+    <div class="footer">静态前端演示 · 无服务器、无外部数据文件 · 菜单和价格均为虚构示例</div>
+  </main>
+  <script src="data.js"></script><script src="chart.js"></script>
+</body>
+</html>
